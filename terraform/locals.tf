@@ -1,4 +1,6 @@
 locals {
-  values = yamldecode(file("./values/${var.env}.yaml"))
-  vnet_values = try(local.values.vnet, {})
+  global_values = yamldecode(file("./values/global.yaml"))
+  env_values    = yamldecode(file("./values/${var.env}.yaml"))
+
+  values = merge(global_values, env_values)
 }

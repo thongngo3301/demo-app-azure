@@ -1,15 +1,34 @@
+resource "random_id" "rg_name" {
+  byte_length = 8
+}
+
+resource "azurerm_resource_group" "example" {
+  location = try(local.values.location, null)
+  name     = "test-${random_id.rg_name.hex}-rg"
+}
+
+resource "azurerm_network_security_group" "default" {
+  location            = try(local.values.location, null)
+  name                = "test-${random_id.rg_name.hex}-nsg"
+  resource_group_name = azurerm_resource_group.example.name
+}
+
+resource "azurerm_route_table" "default" {
+  location            = try(local.values.location, null)
+  name                = "test-${random_id.rg_name.hex}-rt"
+  resource_group_name = azurerm_resource_group.example.name
+}
+
 module "vnet" {
-  source  = "Azure/vnet/azurerm"
+  source              = "Azure/vnet/azurerm"
   resource_group_name = azurerm_resource_group.example.name
   use_for_each        = true
-  address_space       = ["10.0.0.0/16"]
-  subnet_prefixes     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  subnet_names        = ["subnet1", "subnet2", "subnet3"]
-  vnet_location       = var.vnet_location
+  address_space       = try(local.values.vnet.cidr, null)
+  subnet_prefixes     = [ for x in try(local.values.vnet.subnets, [{}]) : x.prefix ]
+  subnet_names        = [ for x in try(local.values.vnet.subnets, [{}]) : x.name ]
+  vnet_location       = try(local.values.location, null)
 
-  nsg_ids = {
-    subnet1 = azurerm_network_security_group.nsg1.id
-  }
+  nsg_ids = { for x in try(local.values.vnet.subnets, [{}]) : x.name => azurerm_network_security_group.default.id }
 
   subnet_service_endpoints = {
     subnet2 = ["Microsoft.Storage", "Microsoft.Sql"],
