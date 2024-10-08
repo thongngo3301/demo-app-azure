@@ -1,4 +1,4 @@
-name: "Terraform Plan/Apply"
+name: "App build and Terraform deployment"
 
 on:
   push:
