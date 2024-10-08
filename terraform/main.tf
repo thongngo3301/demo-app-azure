@@ -1,109 +1,43 @@
-resource "random_id" "rg_name" {
-  byte_length = 8
+data "azurerm_resource_group" "rg" {
+  name = "${local.values.prefix}-${var.env}-${try(local.values.webapp.resource_group_name, "")}"
 }
 
-resource "azurerm_resource_group" "example" {
-  location = try(local.values.location, null)
-  name     = "test-${random_id.rg_name.hex}-rg"
+data "azurerm_subnet" "subnet" {
+  name                 = try(local.values.webapp.subnet, "")
+  virtual_network_name = "${local.values.prefix}-${var.env}-${try(local.values.webapp.vnet, "")}"
+  resource_group_name  = data.azurerm_resource_group.rg.name
 }
 
-resource "azurerm_network_security_group" "default" {
-  location            = try(local.values.location, null)
-  name                = "test-${random_id.rg_name.hex}-nsg"
-  resource_group_name = azurerm_resource_group.example.name
+data "azurerm_postgresql_server" "psql_server" {
+  name                = "${local.values.prefix}-${var.env}-${try(local.values.webapp.psql_server_name, "")}"
+  resource_group_name = data.azurerm_resource_group.rg.name
 }
 
-resource "azurerm_route_table" "default" {
-  location            = try(local.values.location, null)
-  name                = "test-${random_id.rg_name.hex}-rt"
-  resource_group_name = azurerm_resource_group.example.name
+module "webapp" {
+  source = "./modules/linux-web-app-node-20"
+
+  resource_group_name = data.azurerm_resource_group.rg.name
+  app_location        = data.azurerm_resource_group.rg.location
+  app_name            = "${local.values.prefix}-${var.env}-${try(local.values.webapp.name, "")}"
+  app_sku             = try(local.values.webapp.sku, "")
+  app_settings = {
+    PG_HOST     = data.azurerm_postgresql_server.psql_server.fqdn
+    PG_PORT     = try(local.values.webapp.psql_db_port, 5432)
+    PG_DATABASE = try(local.values.webapp.psql_db_name, "")
+    PG_USER     = "${var.psql_db_user}@${data.azurerm_postgresql_server.psql_server.name}"
+    PG_PASSWORD = var.psql_db_password
+  }
+  subnet_id           = data.azurerm_subnet.subnet.id
+  docker_registry_url = "https://${var.docker_registry}"
+  docker_image_name   = var.docker_image
 }
 
-module "vnet" {
-  source              = "Azure/vnet/azurerm"
-  resource_group_name = azurerm_resource_group.example.name
-  use_for_each        = true
-  address_space       = try(local.values.vnet.cidr, null)
-  subnet_prefixes     = [ for x in try(local.values.vnet.subnets, [{}]) : x.prefix ]
-  subnet_names        = [ for x in try(local.values.vnet.subnets, [{}]) : x.name ]
-  vnet_location       = try(local.values.location, null)
-
-  nsg_ids = { for x in try(local.values.vnet.subnets, [{}]) : x.name => azurerm_network_security_group.default.id }
-
-  subnet_service_endpoints = {
-    subnet2 = ["Microsoft.Storage", "Microsoft.Sql"],
-    subnet3 = ["Microsoft.AzureActiveDirectory"]
-  }
-
-  subnet_delegation = {
-    subnet2 = {
-      "Microsoft.Sql.managedInstances" = {
-        service_name = "Microsoft.Sql/managedInstances"
-        service_actions = [
-          "Microsoft.Network/virtualNetworks/subnets/join/action",
-          "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
-          "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action",
-        ]
-      }
-    }
-  }
-
-  route_tables_ids = {
-    subnet1 = azurerm_route_table.rt1.id
-  }
-
-  tags = {
-    environment = "dev"
-    costcenter  = "it"
-  }
-
-  subnet_enforce_private_link_endpoint_network_policies = {
-    subnet2 = true
-  }
-
-  subnet_enforce_private_link_service_network_policies = {
-    subnet3 = true
-  }
-}
-
-module "postgresql" {
-  source = "Azure/postgresql/azurerm"
-
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
-
-  server_name                   = "examples-server"
-  sku_name                      = "GP_Gen5_2"
-  storage_mb                    = 5120
-  auto_grow_enabled             = false
-  backup_retention_days         = 7
-  geo_redundant_backup_enabled  = false
-  administrator_login           = "login"
-  administrator_password        = "password"
-  server_version                = "9.5"
-  ssl_enforcement_enabled       = true
-  public_network_access_enabled = true
-  db_names                      = ["my_db1", "my_db2"]
-  db_charset                    = "UTF8"
-  db_collation                  = "English_United States.1252"
-
-  firewall_rule_prefix = "firewall-"
-  firewall_rules = [
-    { name = "test1", start_ip = "10.0.0.5", end_ip = "10.0.0.8" },
-    { start_ip = "127.0.0.0", end_ip = "127.0.1.0" },
-  ]
-
-  vnet_rule_name_prefix = "postgresql-vnet-rule-"
-  vnet_rules = [
-    { name = "subnet1", subnet_id = "<subnet_id>" }
-  ]
-
-  tags = {
-    Environment = "Production",
-    CostCenter  = "Contoso IT",
-  }
-
-  postgresql_configurations = {
-    backslash_quote = "on",
-  }
-}
+# module "dns" {
+#   source  = "./modules/dns"
+#   zone_id = var.zone_id
+#   name    = try(local.values.dns.name, "")
+#   type    = try(local.values.dns.type, "")
+#   proxied = try(local.values.dns.proxied, true)
+#   comment = try(local.values.dns.comment, "")
+#   value   = module.webapp.domain
+# }

@@ -1,0 +1,26 @@
+name: vault-demo-app
+deployment:
+  name: vault-demo-app
+  image:
+    name: hiiamlala/vault-demo-app
+    tag: latest
+
+vault:
+  auth:
+    mount: kubernetes
+    role: devweb-app
+    serviceAccount: default
+  staticSecret:
+    mount: secret
+    path: devwebapp/config
+    destination:
+      name: demo-app-secret
+      create: true
+    refreshAfter: 15s
+  dynamicSecret:
+    mount: postgresql
+    path: creds/readonly
+    destination:
+      name: demo-app-dynamic-secret
+      create: true
+    refreshAfter: 15s

@@ -1,0 +1,18 @@
+tags:
+  Environment: SQUAD1
+
+webapp:
+  name: node20-webapp
+  resource_group_name: rg
+  vnet: vnet
+  subnet: subnet1
+  sku: B1
+  psql_server_name: psql
+  psql_db_name: my_db1
+  psql_db_port: 5432
+
+dns:
+  name: webapp.tyson.ngo
+  type: CNAME
+  proxied: true
+  comment: Demo webapp

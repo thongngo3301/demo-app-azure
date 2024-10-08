@@ -1,30 +1,36 @@
-variable "subscription_id" {
+variable "api_token" {
   default     = ""
-  description = "The Subscription ID which should be used. This can also be sourced from the ARM_SUBSCRIPTION_ID Environment Variable."
+  description = "My Cloudflare API token for Terraform to interact"
   type        = string
 }
 
-variable "client_id" {
+variable "zone_id" {
   default     = ""
-  description = "The Client ID which should be used. This can also be sourced from the ARM_CLIENT_ID Environment Variable."
+  description = "ID of DNS zone"
   type        = string
 }
 
-variable "client_secret" {
+variable "psql_db_user" {
   default     = ""
-  description = "When authenticating as a Service Principal using a Client Secret, the Client Secret which should be used. This can also be sourced from the ARM_CLIENT_SECRET Environment Variable."
+  description = "PSQL user"
   type        = string
 }
 
-variable "tenant_id" {
+variable "psql_db_password" {
   default     = ""
-  description = "The Tenant ID which should be used. This can also be sourced from the ARM_TENANT_ID Environment Variable."
+  description = "PSQL password"
   type        = string
 }
 
-variable "tenant_id" {
+variable "docker_registry" {
   default     = ""
-  description = "The Tenant ID which should be used. This can also be sourced from the ARM_TENANT_ID Environment Variable."
+  description = "Docker registry for app"
+  type        = string
+}
+
+variable "docker_image" {
+  default     = ""
+  description = "Docker image for app"
   type        = string
 }
 
