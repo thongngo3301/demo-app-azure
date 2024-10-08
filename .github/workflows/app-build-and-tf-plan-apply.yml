@@ -71,6 +71,7 @@ jobs:
     name: "Terraform Plan"
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    needs: [app-build]
     env:
       #this is needed since we are running terraform with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
