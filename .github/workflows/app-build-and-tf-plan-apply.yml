@@ -34,7 +34,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   TF_VAR_env: ${{ github.event.inputs.environment }}
   TF_VAR_docker_registry: ${{ secrets.DOCKER_REGISTRY }}
-  TF_VAR_docker_image: ${{ secrets.DOCKER_REGISTRY }}/${{ github.event.repository.name }}:${{ github.sha }}
+  TF_VAR_docker_image: ${{ github.event.repository.name }}:${{ github.sha }}
   TF_VAR_psql_db_user: ${{ secrets.PSQL_DB_USER }}
   TF_VAR_psql_db_password: ${{ secrets.PSQL_DB_PASSWORD }}
 
