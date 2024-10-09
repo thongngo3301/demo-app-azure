@@ -23,3 +23,17 @@ resource "azurerm_linux_web_app" "main" {
     }
   }
 }
+
+resource "azurerm_resource_group_template_deployment" "dd_ext" {
+  name                = "datadog-siteext"
+  resource_group_name = var.resource_group_name
+  deployment_mode     = "Incremental"
+
+  parameters_content = jsonencode({
+    "site_name" = {
+      value = var.app_name
+    }
+  })
+
+  template_content = file("files/datadog_siteext.json")
+}
