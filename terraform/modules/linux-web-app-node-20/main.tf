@@ -27,7 +27,7 @@ resource "azurerm_linux_web_app" "main" {
 module "txt_record" {
   source  = "../dns"
   zone_id = var.cf_zone_id
-  name    = "${asuid}.${split(",", var.custom_domain_name)[0]})"
+  name    = "asuid.${split(".", var.custom_domain_name)[0]})"
   type    = "TXT"
   proxied = false
   comment = "TXT verification record"
