@@ -26,7 +26,7 @@ export default async function Home() {
         <div>
           <h2>
             Username:{" "}
-            <span className={styles.username}>{maskString(process.env.PG_USER || "", 3)}</span>
+            <span className={styles.username}>{process.env.PG_USER}</span>
           </h2>
           <h2>
             Password:{" "}
@@ -49,7 +49,7 @@ export default async function Home() {
             {users.map(({ role_name, role_attributes }) => (
               <tr key={role_name}>
                 <td>
-                  <span>{maskString(role_name || "", 3)}</span>
+                  <span>{role_name}</span>
                 </td>
                 <td>
                   <span>{role_attributes}</span>
