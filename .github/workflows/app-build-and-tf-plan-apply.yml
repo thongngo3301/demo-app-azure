@@ -32,6 +32,8 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   TF_VAR_env: ${{ github.event.inputs.environment }}
+  TF_VAR_api_token: ${{ secrets.CF_API_TOKEN }}
+  TF_VAR_zone_id: ${{ secrets.CF_ZONE_ID }}
   TF_VAR_docker_registry: ${{ secrets.DOCKER_REGISTRY }}
   TF_VAR_docker_image: ${{ github.event.repository.name }}:${{ github.sha }}
   TF_VAR_psql_db_user: ${{ secrets.PSQL_DB_USER }}

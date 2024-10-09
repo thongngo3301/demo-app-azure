@@ -32,12 +32,12 @@ module "webapp" {
   docker_image_name   = var.docker_image
 }
 
-# module "dns" {
-#   source  = "./modules/dns"
-#   zone_id = var.zone_id
-#   name    = try(local.values.dns.name, "")
-#   type    = try(local.values.dns.type, "")
-#   proxied = try(local.values.dns.proxied, true)
-#   comment = try(local.values.dns.comment, "")
-#   value   = module.webapp.domain
-# }
+module "dns" {
+  source  = "./modules/dns"
+  zone_id = var.zone_id
+  name    = try(local.values.dns.name, "")
+  type    = try(local.values.dns.type, "")
+  proxied = try(local.values.dns.proxied, true)
+  comment = try(local.values.dns.comment, "")
+  value   = module.webapp.domain
+}
