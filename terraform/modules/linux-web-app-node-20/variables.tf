@@ -51,3 +51,9 @@ variable "custom_domain_name" {
   description = "Specifies the Custom Hostname to use for the App Service, example www.example.com. Changing this forces a new resource to be created."
   default     = ""
 }
+
+variable "cf_zone_id" {
+  default     = ""
+  description = "ID of DNS zone on CF"
+  type        = string
+}

@@ -24,8 +24,21 @@ resource "azurerm_linux_web_app" "main" {
   }
 }
 
+module "txt_record" {
+  source  = "../dns"
+  zone_id = var.cf_zone_id
+  name    = "${asuid}.${split(",", var.custom_domain_name)[0]})"
+  type    = "TXT"
+  proxied = false
+  comment = "TXT verification record"
+  value   = azurerm_linux_web_app.main.custom_domain_verification_id
+}
+
 resource "azurerm_app_service_custom_hostname_binding" "main" {
   hostname            = var.custom_domain_name
   app_service_name    = azurerm_linux_web_app.main.name
   resource_group_name = var.resource_group_name
+  depends_on = [
+    module.txt_record
+  ]
 }
