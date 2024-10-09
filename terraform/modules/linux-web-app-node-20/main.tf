@@ -24,7 +24,7 @@ resource "azurerm_linux_web_app" "main" {
   }
 }
 
-resource "azurerm_app_service_custom_hostname_binding" "example" {
+resource "azurerm_app_service_custom_hostname_binding" "main" {
   hostname            = var.custom_domain_name
   app_service_name    = azurerm_linux_web_app.main.name
   resource_group_name = var.resource_group_name
