@@ -30,14 +30,25 @@ module "webapp" {
   subnet_id           = data.azurerm_subnet.subnet.id
   docker_registry_url = "https://${var.docker_registry}"
   docker_image_name   = var.docker_image
+  custom_domain_name  = try(local.values.dns.name, "")
 }
 
-module "dns" {
+module "cname_record" {
   source  = "./modules/dns"
   zone_id = var.zone_id
-  name    = try(local.values.dns.name, "")
-  type    = try(local.values.dns.type, "")
-  proxied = try(local.values.dns.proxied, true)
-  comment = try(local.values.dns.comment, "")
+  name    = try(local.values.dns.CNAME.name, "")
+  type    = try(local.values.dns.CNAME.type, "")
+  proxied = try(local.values.dns.CNAME.proxied, true)
+  comment = try(local.values.dns.CNAME.comment, "")
   value   = module.webapp.domain
+}
+
+module "txt_record" {
+  source  = "./modules/dns"
+  zone_id = var.zone_id
+  name    = try(local.values.dns.TXT.name, "")
+  type    = try(local.values.dns.TXT.type, "")
+  proxied = try(local.values.dns.TXT.proxied, false)
+  comment = try(local.values.dns.TXT.comment, "")
+  value   = module.webapp.custom_domain_verification_id
 }

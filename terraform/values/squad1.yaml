@@ -12,7 +12,13 @@ webapp:
   psql_db_port: 5432
 
 dns:
-  name: webapp.tyson.ngo
-  type: CNAME
-  proxied: true
-  comment: Demo webapp
+  CNAME:
+    name: webapp.tyson.ngo
+    type: CNAME
+    proxied: true
+    comment: Demo webapp CNAME
+  TXT:
+    name: asuid.webapp
+    type: TXT
+    proxied: false
+    comment: Demo webapp TXT

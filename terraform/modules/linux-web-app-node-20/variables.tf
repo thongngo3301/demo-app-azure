@@ -45,3 +45,9 @@ variable "docker_registry_url" {
   description = "The URL of the container registry where the docker_image_name is located. e.g. https://index.docker.io or https://mcr.microsoft.com. This value is required with docker_image_name."
   default     = ""
 }
+
+variable "custom_domain_name" {
+  type        = string
+  description = "Specifies the Custom Hostname to use for the App Service, example www.example.com. Changing this forces a new resource to be created."
+  default     = ""
+}
